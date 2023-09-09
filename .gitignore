@@ -1,3 +1,4 @@
 *.swp
 target
 model.bin
+out.geojson

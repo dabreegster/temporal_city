@@ -4,6 +4,7 @@ use std::io::{BufReader, BufWriter};
 
 use anyhow::Result;
 use fs_err::File;
+use geojson::{Feature, FeatureWriter, Geometry, Value};
 use opening_hours::OpeningHours;
 use osmpbf::{Element, ElementReader};
 use serde::{Deserialize, Serialize};
@@ -23,8 +24,7 @@ fn main() -> Result<()> {
     } else {
         panic!("Gimme .bin or .osm.pbf");
     };
-
-    println!("{} total", model.amenities.len());
+    model.write_gj("out.geojson")?;
     Ok(())
 }
 
@@ -73,11 +73,30 @@ impl Model {
         if let Some(kind) = tags.get("amenity") {
             self.amenities.push(Amenity {
                 kind: kind.to_string(),
-                lon_lat: (lon, lat),
+                lon_lat: (trim_f64(lon), trim_f64(lat)),
                 name: tags.get("name").cloned(),
                 brand: tags.get("brand").cloned(),
                 opening_hours: tags.get("opening_hours").cloned(),
             });
         }
     }
+
+    fn write_gj(&self, path: &str) -> Result<()> {
+        let mut writer = FeatureWriter::from_writer(BufWriter::new(File::create(path)?));
+        for amenity in &self.amenities {
+            let mut feature = Feature::from(Geometry::new(Value::Point(vec![
+                amenity.lon_lat.0,
+                amenity.lon_lat.1,
+            ])));
+            feature.set_property("kind", amenity.kind.clone());
+            feature.set_property("name", amenity.name.clone());
+            feature.set_property("brand", amenity.brand.clone());
+            writer.write_feature(&feature)?;
+        }
+        Ok(())
+    }
+}
+
+fn trim_f64(x: f64) -> f64 {
+    (x * 10e6).round() / 10e6
 }
