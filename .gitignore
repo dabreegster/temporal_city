@@ -1,4 +1,5 @@
 *.swp
 target
+node_modules
 model.bin
 out.geojson
