@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@turf/bbox": "^6.5.0",
+    "opening_hours": "^3.8.0",
     "svelte-maplibre": "^0.3.1"
   }
 }

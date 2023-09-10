@@ -4,6 +4,7 @@
   import type { Map as MapType } from "maplibre-gl";
   import { CircleLayer, GeoJSON, MapLibre, Popup } from "svelte-maplibre";
   import Layout from "./Layout.svelte";
+  import Sidebar from "./Sidebar.svelte";
   import Tooltip from "./Tooltip.svelte";
 
   let fileInput: HTMLInputElement;
@@ -35,6 +36,9 @@
   <div slot="left">
     <h1>Temporal City</h1>
     <input bind:this={fileInput} on:change={fileLoaded} type="file" />
+    {#if gj}
+      <Sidebar {gj} />
+    {/if}
   </div>
   <div slot="main" style="position:relative; width: 100%; height: 100vh;">
     <MapLibre
