@@ -3,6 +3,7 @@
   import opening_hours from "opening_hours";
   import FrequencyTable from "./FrequencyTable.svelte";
   import TimePicker from "./TimePicker.svelte";
+  import AmenityPicker from "./AmenityPicker.svelte";
 
   export let origGj: FeatureCollection;
   export let gj: FeatureCollection;
@@ -10,16 +11,22 @@
 
   let date: Date | null = null;
   let includeUnknown = false;
+  let kindFilter = "";
+
   let numBugs = 0;
 
   function recalculate() {
     console.time("recalculate");
     numBugs = 0;
     gj.features = origGj.features.filter((f) => {
+      let props = f.properties!;
+      if (kindFilter && props.kind != kindFilter) {
+        return false;
+      }
+
       if (date == null) {
         return true;
       }
-      let props = f.properties!;
       if (props.opening_hours) {
         try {
           // TODO Disable nominatim lookup for holidays
@@ -39,7 +46,7 @@
     gj = gj;
     console.timeEnd("recalculate");
   }
-  $: recalculate(origGj, date, includeUnknown);
+  $: recalculate(origGj, date, includeUnknown, kindFilter);
 
   $: kinds = gj.features.map((f) => f.properties!.kind);
   $: brands = gj.features.map((f) => f.properties!.brand).filter((x) => x);
@@ -57,5 +64,6 @@
   Draw heatmap
   <input type="checkbox" bind:checked={drawHeatmap} />
 </label>
+<AmenityPicker bind:kindFilter />
 <FrequencyTable label="Amenity type" input={kinds} />
 <FrequencyTable label="Brand" input={brands} />
