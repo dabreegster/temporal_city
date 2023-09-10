@@ -26,13 +26,14 @@
     type: "FeatureCollection",
     features: [],
   };
+  let drawHeatmap = true;
 </script>
 
 <Layout>
   <div slot="left">
     <h1>Temporal City</h1>
     <input bind:this={fileInput} on:change={fileLoaded} type="file" />
-    <Sidebar {origGj} bind:gj />
+    <Sidebar {origGj} bind:gj bind:drawHeatmap />
   </div>
   <div slot="main" style="position:relative; width: 100%; height: 100vh;">
     <MapLibre
@@ -40,7 +41,7 @@
       standardControls
       bind:map
     >
-      <MapContents {map} {gj} />
+      <MapContents {map} {gj} {drawHeatmap} />
     </MapLibre>
   </div>
 </Layout>

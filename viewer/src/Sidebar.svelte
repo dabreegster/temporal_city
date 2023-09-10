@@ -6,6 +6,7 @@
 
   export let origGj: FeatureCollection;
   export let gj: FeatureCollection;
+  export let drawHeatmap: boolean;
 
   let date: Date | null = null;
   let includeUnknown = false;
@@ -52,5 +53,9 @@
 <p>
   {numBugs.toLocaleString()} places excluded because of opening hours parsing bug
 </p>
+<label>
+  Draw heatmap
+  <input type="checkbox" bind:checked={drawHeatmap} />
+</label>
 <FrequencyTable label="Amenity type" input={kinds} />
 <FrequencyTable label="Brand" input={brands} />
