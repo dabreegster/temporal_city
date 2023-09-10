@@ -70,6 +70,30 @@ impl Model {
     }
 
     fn handle_node(&mut self, tags: Tags, lon: f64, lat: f64) {
+        // Only want places people spend time
+        if tags.is_any(
+            "amenity",
+            vec![
+                "bicycle_parking",
+                "bench",
+                "post_box",
+                "waste_basket",
+                "telephone",
+                "atm",
+                "recycling",
+                "bicycle_rental",
+                "motorcycle_parking",
+                "charging_station",
+                "toilets",
+                "parking",
+                "car_sharing",
+                "vending_machine",
+                "parking_entrance",
+            ],
+        ) {
+            return;
+        }
+
         if let Some(kind) = tags.get("amenity") {
             self.amenities.push(Amenity {
                 kind: kind.to_string(),

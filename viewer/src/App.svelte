@@ -37,7 +37,9 @@
     <h1>Temporal City</h1>
     <input bind:this={fileInput} on:change={fileLoaded} type="file" />
     {#if gj}
-      <Sidebar {gj} />
+      {#key gj}
+        <Sidebar {gj} />
+      {/key}
     {/if}
   </div>
   <div slot="main" style="position:relative; width: 100%; height: 100vh;">
