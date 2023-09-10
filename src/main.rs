@@ -99,52 +99,7 @@ impl Model {
     }
 
     fn add_object(&mut self, osm_id: OsmID, tags: Tags, lon_lat: (f64, f64)) {
-        // Only want places people spend time
-        // TODO Allowlist might be easier
-        if tags.is_any(
-            "amenity",
-            vec![
-                "bicycle_parking",
-                "bench",
-                "post_box",
-                "waste_basket",
-                "telephone",
-                "atm",
-                "recycling",
-                "bicycle_rental",
-                "motorcycle_parking",
-                "charging_station",
-                "toilets",
-                "parking",
-                "car_sharing",
-                "vending_machine",
-                "parking_entrance",
-                "waste_disposal",
-                "housing_office",
-                "bicycle_repair_station",
-                "grit_bin",
-                "dog_litter_box",
-                "parking_meter",
-                "drinking_water",
-                "fuel",
-                "parcel_locker",
-                "taxi",
-                "car_rental",
-                "public_bookcase",
-                "car_wash",
-                "parking_space",
-            ],
-        ) {
-            return;
-        }
-
-        if let Some(kind) = tags.get("amenity") {
-            let kind = if let Some(cuisine) = tags.get("cuisine") {
-                format!("{kind} ({cuisine})")
-            } else {
-                kind.to_string()
-            };
-
+        if let Some(kind) = get_kind(&tags) {
             self.amenities.push(Amenity {
                 osm_id,
                 kind,
@@ -180,4 +135,55 @@ impl Model {
 
 fn trim_f64(x: f64) -> f64 {
     (x * 10e6).round() / 10e6
+}
+
+fn get_kind(tags: &Tags) -> Option<String> {
+    // Only want places people spend time
+    // TODO Allowlist might be easier
+    if tags.is_any(
+        "amenity",
+        vec![
+            "bicycle_parking",
+            "bench",
+            "post_box",
+            "waste_basket",
+            "telephone",
+            "atm",
+            "recycling",
+            "bicycle_rental",
+            "motorcycle_parking",
+            "charging_station",
+            "toilets",
+            "parking",
+            "car_sharing",
+            "vending_machine",
+            "parking_entrance",
+            "waste_disposal",
+            "housing_office",
+            "bicycle_repair_station",
+            "grit_bin",
+            "dog_litter_box",
+            "parking_meter",
+            "drinking_water",
+            "fuel",
+            "parcel_locker",
+            "taxi",
+            "car_rental",
+            "public_bookcase",
+            "car_wash",
+            "parking_space",
+        ],
+    ) {
+        return None;
+    }
+
+    if let Some(kind) = tags.get("amenity") {
+        return Some(if let Some(cuisine) = tags.get("cuisine") {
+            format!("{kind} ({cuisine})")
+        } else {
+            kind.to_string()
+        });
+    }
+
+    tags.get("shop").cloned()
 }

@@ -5,6 +5,7 @@
   let choices = [
     ["All", ""],
     ["Fast food", "fast_food"],
+    ["Antiques", "antiques"],
   ];
 </script>
 
