@@ -15,6 +15,11 @@
     return turfBbox(gj) as [number, number, number, number];
   }
 
+  function openOSM(e) {
+    let id = e.detail.features![0].properties.node_id;
+    window.open(`http://openstreetmap.org/node/${id}`, "_blank");
+  }
+
   let colors = {
     hasBrand: "blue",
     local: "red",
@@ -34,6 +39,8 @@
       ],
       "circle-radius": 5,
     }}
+    hoverCursor="pointer"
+    on:click={openOSM}
   >
     <Popup openOn="hover" let:features>
       <Tooltip props={features[0].properties} />

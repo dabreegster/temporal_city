@@ -35,6 +35,7 @@ struct Model {
 
 #[derive(Serialize, Deserialize)]
 struct Amenity {
+    node_id: i64,
     kind: String,
     lon_lat: (f64, f64),
     name: Option<String>,
@@ -55,22 +56,23 @@ impl Model {
                 for (k, v) in node.tags() {
                     tags.insert(k, v);
                 }
-                model.handle_node(tags, node.lon(), node.lat());
+                model.handle_node(node.id(), tags, node.lon(), node.lat());
             }
             Element::DenseNode(node) => {
                 let mut tags = Tags::new();
                 for (k, v) in node.tags() {
                     tags.insert(k, v);
                 }
-                model.handle_node(tags, node.lon(), node.lat());
+                model.handle_node(node.id, tags, node.lon(), node.lat());
             }
             _ => {}
         })?;
         Ok(model)
     }
 
-    fn handle_node(&mut self, tags: Tags, lon: f64, lat: f64) {
+    fn handle_node(&mut self, node_id: i64, tags: Tags, lon: f64, lat: f64) {
         // Only want places people spend time
+        // TODO Allowlist might be easier
         if tags.is_any(
             "amenity",
             vec![
@@ -96,6 +98,7 @@ impl Model {
 
         if let Some(kind) = tags.get("amenity") {
             self.amenities.push(Amenity {
+                node_id,
                 kind: kind.to_string(),
                 lon_lat: (trim_f64(lon), trim_f64(lat)),
                 name: tags.get("name").cloned(),
@@ -115,6 +118,7 @@ impl Model {
             feature.set_property("kind", amenity.kind.clone());
             feature.set_property("name", amenity.name.clone());
             feature.set_property("brand", amenity.brand.clone());
+            feature.set_property("node_id", amenity.node_id);
             writer.write_feature(&feature)?;
         }
         Ok(())
