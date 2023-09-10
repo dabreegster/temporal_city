@@ -91,6 +91,13 @@ impl Model {
                 "car_sharing",
                 "vending_machine",
                 "parking_entrance",
+                "waste_disposal",
+                "housing_office",
+                "bicycle_repair_station",
+                "grit_bin",
+                "dog_litter_box",
+                "parking_meter",
+                "drinking_water",
             ],
         ) {
             return;
@@ -119,6 +126,7 @@ impl Model {
             feature.set_property("name", amenity.name.clone());
             feature.set_property("brand", amenity.brand.clone());
             feature.set_property("node_id", amenity.node_id);
+            feature.set_property("opening_hours", amenity.opening_hours.clone());
             writer.write_feature(&feature)?;
         }
         Ok(())
