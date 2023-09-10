@@ -1,6 +1,6 @@
 <script lang="ts">
   // Empty means no filter
-  export let kindFilter: string  = "";
+  export let kindFilter: string = "";
 
   let choices = [
     ["All", ""],

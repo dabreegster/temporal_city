@@ -1,5 +1,6 @@
 mod tags;
 
+use std::collections::HashMap;
 use std::io::{BufReader, BufWriter};
 
 use anyhow::Result;
@@ -34,7 +35,7 @@ struct Model {
 
 #[derive(Serialize, Deserialize)]
 struct Amenity {
-    node_id: i64,
+    osm_id: OsmID,
     kind: String,
     lon_lat: (f64, f64),
     name: Option<String>,
@@ -43,11 +44,20 @@ struct Amenity {
     opening_hours: Option<String>,
 }
 
+#[derive(Serialize, Deserialize)]
+enum OsmID {
+    Node(i64),
+    Way(i64),
+    Relation(i64),
+}
+
 impl Model {
     fn new_from_pbf(path: &str) -> Result<Self> {
         let mut model = Model {
             amenities: Vec::new(),
         };
+        // Need these for ways/relations
+        let mut node_positions = HashMap::new();
         let reader = ElementReader::from_path(path)?;
         reader.for_each(|element| match element {
             Element::Node(node) => {
@@ -55,21 +65,40 @@ impl Model {
                 for (k, v) in node.tags() {
                     tags.insert(k, v);
                 }
-                model.handle_node(node.id(), tags, node.lon(), node.lat());
+                let pt = (trim_f64(node.lon()), trim_f64(node.lat()));
+                node_positions.insert(node.id(), pt);
+                model.add_object(OsmID::Node(node.id()), tags, pt);
             }
             Element::DenseNode(node) => {
                 let mut tags = Tags::new();
                 for (k, v) in node.tags() {
                     tags.insert(k, v);
                 }
-                model.handle_node(node.id, tags, node.lon(), node.lat());
+                let pt = (trim_f64(node.lon()), trim_f64(node.lat()));
+                node_positions.insert(node.id(), pt);
+                model.add_object(OsmID::Node(node.id()), tags, pt);
             }
-            _ => {}
+            Element::Way(way) => {
+                let mut tags = Tags::new();
+                for (k, v) in way.tags() {
+                    tags.insert(k, v);
+                }
+                // TODO Centroid or something nicer
+                model.add_object(
+                    OsmID::Way(way.id()),
+                    tags,
+                    node_positions[&way.refs().next().unwrap()],
+                );
+            }
+            Element::Relation(_) => {
+                // TODO Handle. What about when they're large, or might be double-tagged?
+                // https://www.openstreetmap.org/relation/14875126
+            }
         })?;
         Ok(model)
     }
 
-    fn handle_node(&mut self, node_id: i64, tags: Tags, lon: f64, lat: f64) {
+    fn add_object(&mut self, osm_id: OsmID, tags: Tags, lon_lat: (f64, f64)) {
         // Only want places people spend time
         // TODO Allowlist might be easier
         if tags.is_any(
@@ -103,6 +132,7 @@ impl Model {
                 "car_rental",
                 "public_bookcase",
                 "car_wash",
+                "parking_space",
             ],
         ) {
             return;
@@ -116,9 +146,9 @@ impl Model {
             };
 
             self.amenities.push(Amenity {
-                node_id,
+                osm_id,
                 kind,
-                lon_lat: (trim_f64(lon), trim_f64(lat)),
+                lon_lat,
                 name: tags.get("name").cloned(),
                 brand: tags.get("brand").cloned(),
                 opening_hours: tags.get("opening_hours").cloned(),
@@ -136,7 +166,11 @@ impl Model {
             feature.set_property("kind", amenity.kind.clone());
             feature.set_property("name", amenity.name.clone());
             feature.set_property("brand", amenity.brand.clone());
-            feature.set_property("node_id", amenity.node_id);
+            match amenity.osm_id {
+                OsmID::Node(x) => feature.set_property("node_id", x),
+                OsmID::Way(x) => feature.set_property("way_id", x),
+                OsmID::Relation(x) => feature.set_property("relation_id", x),
+            }
             feature.set_property("opening_hours", amenity.opening_hours.clone());
             writer.write_feature(&feature)?;
         }

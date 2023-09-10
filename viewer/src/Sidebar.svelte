@@ -1,9 +1,10 @@
 <script lang="ts">
   import type { FeatureCollection } from "geojson";
   import opening_hours from "opening_hours";
+  import AmenityPicker from "./AmenityPicker.svelte";
+  import { osmUrl } from "./data";
   import FrequencyTable from "./FrequencyTable.svelte";
   import TimePicker from "./TimePicker.svelte";
-  import AmenityPicker from "./AmenityPicker.svelte";
 
   export let origGj: FeatureCollection;
   export let gj: FeatureCollection;
@@ -33,9 +34,11 @@
           let oh = new opening_hours(props.opening_hours, null);
           return oh.getState(date);
         } catch (err) {
-          /*console.log(
-            `Bug for http://openstreetmap.org/node/${props.node_id} (${props.opening_hours}): ${err}`
-          );*/
+          if (false) {
+            console.log(
+              `Bug for ${osmUrl(props)} (${props.opening_hours}): ${err}`
+            );
+          }
           numBugs++;
           return includeUnknown;
         }

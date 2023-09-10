@@ -1,12 +1,12 @@
 <script lang="ts">
   import { CircleLayer, Popup } from "svelte-maplibre";
+  import { osmUrl } from "./data";
   import Tooltip from "./Tooltip.svelte";
 
   export let drawHeatmap: boolean;
 
   function openOSM(e: CustomEvent<any>) {
-    let id = e.detail.features![0].properties.node_id;
-    window.open(`http://openstreetmap.org/node/${id}`, "_blank");
+    window.open(osmUrl(e.detail.features![0].properties), "_blank");
   }
 
   let colors = {
