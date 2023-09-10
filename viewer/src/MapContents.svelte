@@ -8,14 +8,18 @@
   export let map: MapType;
   export let gj: FeatureCollection;
 
-  map.fitBounds(bbox(gj), { padding: 100, duration: 500 });
+  let once = true;
+  $: if (once && gj.features.length > 0) {
+    once = false;
+    map.fitBounds(bbox(gj), { padding: 100, duration: 500 });
+  }
 
   // Suitable for passing to map.fitBounds. Work around https://github.com/Turfjs/turf/issues/1807.
   function bbox(gj: FeatureCollection): [number, number, number, number] {
     return turfBbox(gj) as [number, number, number, number];
   }
 
-  function openOSM(e) {
+  function openOSM(e: CustomEvent<any>) {
     let id = e.detail.features![0].properties.node_id;
     window.open(`http://openstreetmap.org/node/${id}`, "_blank");
   }
@@ -29,7 +33,6 @@
 <GeoJSON id="input" data={gj}>
   <CircleLayer
     id="input-layer"
-    manageHoverState
     paint={{
       "circle-color": [
         "case",

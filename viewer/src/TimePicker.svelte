@@ -1,5 +1,5 @@
 <script lang="ts">
-  export let filter: Date | null = null;
+  export let date: Date | null = null;
   let selected = "";
 
   let choices = [
@@ -11,8 +11,7 @@
     ["Saturday 11pm", new Date("September 16, 2023 21:00:00")],
   ];
 
-  $: filter = selected ? new Date(selected) : null;
-  $: console.log(filter);
+  $: date = selected ? new Date(selected) : null;
 </script>
 
 <div>

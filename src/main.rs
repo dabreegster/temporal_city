@@ -5,7 +5,6 @@ use std::io::{BufReader, BufWriter};
 use anyhow::Result;
 use fs_err::File;
 use geojson::{Feature, FeatureWriter, Geometry, Value};
-use opening_hours::OpeningHours;
 use osmpbf::{Element, ElementReader};
 use serde::{Deserialize, Serialize};
 
@@ -98,6 +97,10 @@ impl Model {
                 "dog_litter_box",
                 "parking_meter",
                 "drinking_water",
+                "fuel",
+                "parcel_locker",
+                "taxi",
+                "car_rental",
             ],
         ) {
             return;

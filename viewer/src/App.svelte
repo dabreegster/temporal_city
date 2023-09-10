@@ -10,29 +10,29 @@
   function fileLoaded(e: Event) {
     let reader = new FileReader();
     reader.onload = (e) => {
-      loadFile(e.target!.result as string);
+      origGj = JSON.parse(e.target!.result as string);
     };
     let files = fileInput.files!;
     reader.readAsText(files[0]);
   }
 
   let map: MapType;
-  let gj: FeatureCollection | undefined;
-
-  function loadFile(contents: string) {
-    gj = JSON.parse(contents);
-  }
+  let origGj: FeatureCollection = {
+    type: "FeatureCollection",
+    features: [],
+  };
+  // Current / filtered
+  let gj: FeatureCollection = {
+    type: "FeatureCollection",
+    features: [],
+  };
 </script>
 
 <Layout>
   <div slot="left">
     <h1>Temporal City</h1>
     <input bind:this={fileInput} on:change={fileLoaded} type="file" />
-    {#if gj}
-      {#key gj}
-        <Sidebar {gj} />
-      {/key}
-    {/if}
+    <Sidebar {origGj} bind:gj />
   </div>
   <div slot="main" style="position:relative; width: 100%; height: 100vh;">
     <MapLibre
@@ -40,9 +40,7 @@
       standardControls
       bind:map
     >
-      {#if gj}
-        <MapContents {map} {gj} />
-      {/if}
+      <MapContents {map} {gj} />
     </MapLibre>
   </div>
 </Layout>

@@ -2,14 +2,19 @@
   export let label: string;
   export let input: string[];
 
-  let counts = {};
-  for (let x of input) {
-    counts[x] ??= 0;
-    counts[x]++;
-  }
+  $: rows = calculate(input);
 
-  let rows = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-  rows.length = 10;
+  function calculate(input: string[]): [string, number][] {
+    let counts: { [name: string]: number } = {};
+    for (let x of input) {
+      counts[x] ??= 0;
+      counts[x]++;
+    }
+
+    let rows = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    rows.length = Math.min(10, rows.length);
+    return rows;
+  }
 
   // TODO https://github.com/dasDaniel/svelte-table?
 </script>
