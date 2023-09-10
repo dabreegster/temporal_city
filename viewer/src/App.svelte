@@ -1,11 +1,10 @@
 <script lang="ts">
-  import turfBbox from "@turf/bbox";
   import type { FeatureCollection } from "geojson";
   import type { Map as MapType } from "maplibre-gl";
-  import { CircleLayer, GeoJSON, MapLibre, Popup } from "svelte-maplibre";
+  import { MapLibre } from "svelte-maplibre";
   import Layout from "./Layout.svelte";
+  import MapContents from "./MapContents.svelte";
   import Sidebar from "./Sidebar.svelte";
-  import Tooltip from "./Tooltip.svelte";
 
   let fileInput: HTMLInputElement;
   function fileLoaded(e: Event) {
@@ -18,17 +17,10 @@
   }
 
   let map: MapType;
-
   let gj: FeatureCollection | undefined;
 
   function loadFile(contents: string) {
     gj = JSON.parse(contents);
-    map.fitBounds(bbox(gj!), { padding: 100, duration: 500 });
-  }
-
-  // Suitable for passing to map.fitBounds. Work around https://github.com/Turfjs/turf/issues/1807.
-  function bbox(gj: FeatureCollection): [number, number, number, number] {
-    return turfBbox(gj) as [number, number, number, number];
   }
 </script>
 
@@ -49,20 +41,7 @@
       bind:map
     >
       {#if gj}
-        <GeoJSON id="input" data={gj}>
-          <CircleLayer
-            id="input-layer"
-            manageHoverState
-            paint={{
-              "circle-color": "red",
-              "circle-radius": 5,
-            }}
-          >
-            <Popup openOn="hover" let:features>
-              <Tooltip props={features[0].properties} />
-            </Popup>
-          </CircleLayer>
-        </GeoJSON>
+        <MapContents {map} {gj} />
       {/if}
     </MapLibre>
   </div>
