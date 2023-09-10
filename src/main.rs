@@ -101,15 +101,23 @@ impl Model {
                 "parcel_locker",
                 "taxi",
                 "car_rental",
+                "public_bookcase",
+                "car_wash",
             ],
         ) {
             return;
         }
 
         if let Some(kind) = tags.get("amenity") {
+            let kind = if let Some(cuisine) = tags.get("cuisine") {
+                format!("{kind} ({cuisine})")
+            } else {
+                kind.to_string()
+            };
+
             self.amenities.push(Amenity {
                 node_id,
-                kind: kind.to_string(),
+                kind,
                 lon_lat: (trim_f64(lon), trim_f64(lat)),
                 name: tags.get("name").cloned(),
                 brand: tags.get("brand").cloned(),
